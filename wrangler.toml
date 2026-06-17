@@ -1,0 +1,16 @@
+# Cloudflare Pages 配置
+# ==========================================
+# 本地手动部署命令：
+#   npx wrangler pages deploy . --branch main
+#
+# 或在 Cloudflare Dashboard 中配置：
+#   Build command: （留空，纯静态无需构建）
+#   Build output dir: .
+# ==========================================
+
+name = "emulsion-poker-apps"
+compatibility_date = "2025-06-17"
+
+# 告诉 Wrangler 这是静态站点
+[site]
+bucket = "."

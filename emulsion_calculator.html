@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧪 乳液制备配比计算器</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+<style>
+  body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e2e8f0; min-height: 100vh; }
+  .glass { background: rgba(30,41,59,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); }
+  .input-dark { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; border-radius: 10px; transition: all 0.2s; }
+  .input-dark:focus { border-color: #22d3ee; outline: none; box-shadow: 0 0 0 3px rgba(34,211,238,0.1); }
+  .btn-calc { background: linear-gradient(135deg, #06b6d4, #0891b2); transition: all 0.2s; }
+  .btn-calc:hover { background: linear-gradient(135deg, #22d3ee, #06b6d4); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(6,182,212,0.3); }
+  .btn-calc:active { transform: scale(0.98); }
+  .result-card { background: rgba(15,23,42,0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; transition: all 0.3s; }
+  .result-card:hover { border-color: rgba(34,211,238,0.3); }
+  .error-box { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+  .success-box { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-up { animation: fadeUp 0.4s ease; }
+  .label-edit { border-bottom: 1px dashed transparent; cursor: pointer; transition: all 0.2s; }
+  .label-edit:hover { border-bottom-color: rgba(34,211,238,0.4); color: #22d3ee; }
+  .label-input { background: rgba(15,23,42,0.8); border: 1px solid #22d3ee; color: #e2e8f0; border-radius: 6px; font-size: inherit; padding: 1px 6px; width: 100%; }
+  .saved-row { animation: fadeUp 0.3s ease; }
+  .delete-btn { transition: all 0.15s; }
+  .delete-btn:hover { background: rgba(239,68,68,0.2); color: #f87171; }
+</style>
+</head>
+<body class="p-4 max-w-xl mx-auto">
+
+  <div class="text-center mb-6 pt-4">
+    <div class="text-5xl mb-3">🧪</div>
+    <h1 class="text-2xl font-bold tracking-wide">乳液制备配比计算器</h1>
+    <p class="text-slate-400 text-sm mt-1">Emulsion Preparation Calculator</p>
+  </div>
+
+  <!-- 输入区 -->
+  <div class="glass rounded-2xl p-5 mb-4">
+    <h2 class="text-sm font-semibold text-cyan-400 mb-4">
+      <i class="fa fa-sliders mr-1"></i>输入参数
+      <span class="text-[10px] text-slate-500 ml-2 font-normal">（点击标签可重命名）</span>
+    </h2>
+
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="text-xs text-slate-400 mb-1.5 flex items-center gap-1">
+          <span class="label-edit" onclick="editLabel('label_vTotal', this)" id="label_vTotal_display"></span>
+          <i class="fa fa-pencil text-[9px] text-slate-600 hover:text-cyan-400 cursor-pointer" onclick="editLabel('label_vTotal', this.parentElement.querySelector('.label-edit'))"></i>
+        </label>
+        <input id="vTotal" type="number" value="100" min="0.01" step="10" class="input-dark w-full px-3 py-2.5 text-sm">
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1.5 flex items-center gap-1">
+          <span class="label-edit" onclick="editLabel('label_cTarget', this)" id="label_cTarget_display"></span>
+          <i class="fa fa-pencil text-[9px] text-slate-600 hover:text-cyan-400 cursor-pointer" onclick="editLabel('label_cTarget', this.parentElement.querySelector('.label-edit'))"></i>
+        </label>
+        <input id="cTarget" type="number" value="0.1" min="0.0001" step="0.05" class="input-dark w-full px-3 py-2.5 text-sm">
+        <span class="text-[10px] text-slate-500"><span class="label-edit" onclick="editLabel('label_cTargetHint', this)" id="label_cTargetHint_display"></span></span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="text-xs text-slate-400 mb-1.5 flex items-center gap-1">
+          <span class="label-edit" onclick="editLabel('label_rWater', this)" id="label_rWater_display"></span>
+          <i class="fa fa-pencil text-[9px] text-slate-600 hover:text-cyan-400 cursor-pointer" onclick="editLabel('label_rWater', this.parentElement.querySelector('.label-edit'))"></i>
+        </label>
+        <input id="rWater" type="number" value="7" min="0.01" step="0.5" class="input-dark w-full px-3 py-2.5 text-sm">
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1.5 flex items-center gap-1">
+          <span class="label-edit" onclick="editLabel('label_rOil', this)" id="label_rOil_display"></span>
+          <i class="fa fa-pencil text-[9px] text-slate-600 hover:text-cyan-400 cursor-pointer" onclick="editLabel('label_rOil', this.parentElement.querySelector('.label-edit'))"></i>
+        </label>
+        <input id="rOil" type="number" value="3" min="0.01" step="0.5" class="input-dark w-full px-3 py-2.5 text-sm">
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="text-xs text-slate-400 mb-1.5 flex items-center gap-1">
+        <span class="label-edit" onclick="editLabel('label_cStock', this)" id="label_cStock_display"></span>
+        <i class="fa fa-pencil text-[9px] text-slate-600 hover:text-cyan-400 cursor-pointer" onclick="editLabel('label_cStock', this.parentElement.querySelector('.label-edit'))"></i>
+      </label>
+      <input id="cStock" type="number" value="1.0" min="0.0001" step="0.1" class="input-dark w-full px-3 py-2.5 text-sm">
+      <span class="text-[10px] text-slate-500"><span class="label-edit" onclick="editLabel('label_cStockHint', this)" id="label_cStockHint_display"></span></span>
+    </div>
+
+    <div class="text-xs text-slate-400 text-center py-2 rounded-lg bg-slate-800/50" id="ratioDisplay">
+      当前水油比：<b>水 : 油 = 7.0 : 3.0</b>
+    </div>
+
+    <button onclick="calculate()" class="btn-calc w-full mt-4 text-white font-semibold py-3 rounded-xl text-base">
+      <i class="fa fa-flask mr-1"></i>开始计算
+    </button>
+  </div>
+
+  <!-- 错误区 -->
+  <div id="errorArea" class="hidden error-box rounded-2xl p-4 mb-4 fade-up"></div>
+
+  <!-- 结果区 -->
+  <div id="resultArea" class="hidden fade-up">
+    <div class="glass rounded-2xl p-5 mb-4">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-semibold text-cyan-400">
+          <i class="fa fa-bar-chart mr-1"></i>计算结果
+        </h2>
+        <button onclick="saveResult()" class="bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-300 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors">
+          <i class="fa fa-bookmark mr-1"></i>保存此结果
+        </button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="result-card p-4 text-center">
+          <div class="text-2xl mb-1">💧</div>
+          <div class="text-xl font-bold text-blue-300 font-mono" id="resWater">—</div>
+          <div class="text-[10px] text-slate-500 mt-1">
+            <span class="label-edit" onclick="editLabel('label_outWater', this)" id="label_outWater_display"></span>
+          </div>
+        </div>
+        <div class="result-card p-4 text-center">
+          <div class="text-2xl mb-1">🧴</div>
+          <div class="text-xl font-bold text-amber-300 font-mono" id="resStock">—</div>
+          <div class="text-[10px] text-slate-500 mt-1">
+            <span class="label-edit" onclick="editLabel('label_outStock', this)" id="label_outStock_display"></span>
+          </div>
+        </div>
+        <div class="result-card p-4 text-center">
+          <div class="text-2xl mb-1">🥥</div>
+          <div class="text-xl font-bold text-green-300 font-mono" id="resOil">—</div>
+          <div class="text-[10px] text-slate-500 mt-1">
+            <span class="label-edit" onclick="editLabel('label_outOil', this)" id="label_outOil_display"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="success-box rounded-xl p-4 text-sm text-green-300" id="summary"></div>
+    </div>
+
+    <!-- 详细计算 -->
+    <div class="glass rounded-2xl p-5">
+      <h2 class="text-sm font-semibold text-cyan-400 mb-3 cursor-pointer flex items-center justify-between" onclick="toggleDetail()">
+        <span><i class="fa fa-calculator mr-1"></i>详细计算过程</span>
+        <i class="fa fa-chevron-down text-xs transition-transform" id="detailArrow"></i>
+      </h2>
+      <div id="detailArea" class="hidden text-xs space-y-2 text-slate-300">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="text-slate-400 border-b border-slate-700">
+              <th class="py-2 pr-2">步骤</th><th class="py-2 pr-2">公式</th><th class="py-2">结果</th>
+            </tr>
+          </thead>
+          <tbody id="detailBody"></tbody>
+        </table>
+        <div id="verifyArea" class="success-box rounded-lg p-3 text-xs text-green-300 mt-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 保存的历史结果 -->
+  <div id="savedArea" class="hidden glass rounded-2xl p-5 mb-4 fade-up">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold text-cyan-400">
+        <i class="fa fa-history mr-1"></i>历史保存
+        <span class="text-[10px] text-slate-500 ml-1" id="savedCount"></span>
+      </h2>
+      <button onclick="clearAllSaved()" class="text-[10px] text-slate-500 hover:text-red-400 transition-colors">
+        <i class="fa fa-trash-o mr-1"></i>清空全部
+      </button>
+    </div>
+    <div id="savedList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+  </div>
+
+  <div class="text-center text-[10px] text-slate-600 mt-6 pb-6">
+    后续可在计算模块中扩展水相溶质计算（如乙酸浓度）
+  </div>
+
+<script>
+// ============================================================
+//  可编辑标签管理
+// ============================================================
+const DEFAULT_LABELS = {
+  label_vTotal:     '目标乳液总体积 (mL)',
+  label_cTarget:    '目标乳化剂浓度 (%)',
+  label_cTargetHint: '例如 PGPR 0.1%',
+  label_rWater:     '水相比例（水）',
+  label_rOil:       '油相比例（油）',
+  label_cStock:     '储备液乳化剂浓度 (%)',
+  label_cStockHint: '例如 1% PGPR 椰子油储备液',
+  label_outWater:   '水相（如乙酸溶液）',
+  label_outStock:   '储备液',
+  label_outOil:     '纯油（纯椰子油）',
+}
+
+// 从 localStorage 加载或使用默认
+function loadLabels() {
+  const saved = localStorage.getItem('emulsion_labels')
+  return saved ? { ...DEFAULT_LABELS, ...JSON.parse(saved) } : { ...DEFAULT_LABELS }
+}
+
+function saveLabels() {
+  localStorage.setItem('emulsion_labels', JSON.stringify(labels))
+}
+
+let labels = loadLabels()
+
+// 渲染所有标签
+function renderAllLabels() {
+  for (const [key, val] of Object.entries(labels)) {
+    const el = document.getElementById(key + '_display')
+    if (el) el.textContent = val
+  }
+}
+
+// 点击标签 → 切换为输入框
+function editLabel(key, spanEl) {
+  const current = labels[key] || DEFAULT_LABELS[key] || ''
+  const input = document.createElement('input')
+  input.type = 'text'
+  input.value = current
+  input.className = 'label-input'
+  input.style.width = (spanEl.offsetWidth + 40) + 'px'
+  spanEl.replaceWith(input)
+  input.focus()
+  input.select()
+
+  function commit() {
+    const val = input.value.trim()
+    if (val) {
+      labels[key] = val
+      saveLabels()
+    }
+    const newSpan = document.createElement('span')
+    newSpan.className = 'label-edit'
+    newSpan.id = key + '_display'
+    newSpan.textContent = labels[key]
+    newSpan.onclick = function() { editLabel(key, this) }
+    input.replaceWith(newSpan)
+  }
+
+  input.addEventListener('blur', commit)
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { input.blur() } })
+}
+
+// ============================================================
+//  当前计算结果缓存（用于保存）
+// ============================================================
+let lastResult = null
+
+// ============================================================
+//  核心计算逻辑
+// ============================================================
+function calculate() {
+  const vTotal   = parseFloat(document.getElementById('vTotal').value)
+  const rWater   = parseFloat(document.getElementById('rWater').value)
+  const rOil     = parseFloat(document.getElementById('rOil').value)
+  const cTarget  = parseFloat(document.getElementById('cTarget').value)
+  const cStock   = parseFloat(document.getElementById('cStock').value)
+
+  hideError()
+  hideResult()
+
+  let err = null
+  if (isNaN(vTotal) || vTotal <= 0) err = '目标乳液总体积必须大于 0'
+  else if (isNaN(rWater) || rWater <= 0) err = '水相比例必须大于 0'
+  else if (isNaN(rOil) || rOil <= 0) err = '油相比例必须大于 0'
+  else if (isNaN(cTarget) || cTarget <= 0) err = `${labels.label_cTarget} 必须大于 0`
+  else if (isNaN(cStock) || cStock <= 0) err = `${labels.label_cStock} 必须大于 0`
+
+  if (err) { showError(err); return }
+
+  const ratioSum  = rWater + rOil
+  const vWater    = vTotal * rWater / ratioSum
+  const vOil      = vTotal * rOil   / ratioSum
+  const vStock    = vTotal * cTarget / cStock
+  const vPureOil  = vOil - vStock
+
+  if (vPureOil < 0) {
+    showError(
+      `❌ 储备液浓度过低，无法调制该目标浓度的乳液！<br><br>
+      油相总体积仅 <b>${vOil.toFixed(4)} mL</b>，但需 <b>${vStock.toFixed(4)} mL</b> 储备液。<br>
+      请提高 ${labels.label_cStock}（当前 ${cStock}%），或降低 ${labels.label_cTarget}（当前 ${cTarget}%）。`
+    )
+    return
+  }
+
+  document.getElementById('resWater').textContent = vWater.toFixed(2) + ' mL'
+  document.getElementById('resStock').textContent = vStock.toFixed(2) + ' mL'
+  document.getElementById('resOil').textContent   = vPureOil.toFixed(2) + ' mL'
+
+  const stockName = labels.label_outStock + '（' + cStock + '%）'
+  document.getElementById('summary').innerHTML =
+    `📝 <b>配比摘要</b>：取 <b>${vWater.toFixed(2)} mL</b> ${labels.label_outWater}，加入 <b>${vStock.toFixed(2)} mL</b> ${stockName}，再加入 <b>${vPureOil.toFixed(2)} mL</b> ${labels.label_outOil}，混合均匀即得 <b>${vTotal.toFixed(2)} mL</b> ${cTarget}% 目标乳液。`
+
+  document.getElementById('detailBody').innerHTML = `
+    <tr class="border-b border-slate-700/50">
+      <td class="py-2 pr-2">水相总体积</td>
+      <td class="py-2 pr-2 text-slate-400">V<sub>total</sub> × R<sub>water</sub> / (R<sub>water</sub> + R<sub>oil</sub>)</td>
+      <td class="py-2 font-mono"><b>${vTotal} × ${rWater} / ${ratioSum} = ${vWater.toFixed(4)} mL</b></td>
+    </tr>
+    <tr class="border-b border-slate-700/50">
+      <td class="py-2 pr-2">油相总体积</td>
+      <td class="py-2 pr-2 text-slate-400">V<sub>total</sub> × R<sub>oil</sub> / (R<sub>water</sub> + R<sub>oil</sub>)</td>
+      <td class="py-2 font-mono"><b>${vTotal} × ${rOil} / ${ratioSum} = ${vOil.toFixed(4)} mL</b></td>
+    </tr>
+    <tr class="border-b border-slate-700/50">
+      <td class="py-2 pr-2">储备液体积</td>
+      <td class="py-2 pr-2 text-slate-400">V<sub>total</sub> × C<sub>target</sub> / C<sub>stock</sub></td>
+      <td class="py-2 font-mono"><b>${vTotal} × ${cTarget}% / ${cStock}% = ${vStock.toFixed(4)} mL</b></td>
+    </tr>
+    <tr>
+      <td class="py-2 pr-2">纯油体积</td>
+      <td class="py-2 pr-2 text-slate-400">V<sub>oil</sub> − V<sub>stock</sub></td>
+      <td class="py-2 font-mono"><b>${vOil.toFixed(4)} − ${vStock.toFixed(4)} = ${vPureOil.toFixed(4)} mL</b></td>
+    </tr>
+  `
+
+  const checkOil = `${vStock.toFixed(2)} + ${vPureOil.toFixed(2)} = ${(vStock + vPureOil).toFixed(2)}`
+  const checkTotal = `${vWater.toFixed(2)} + ${(vStock + vPureOil).toFixed(2)} = ${(vWater + vStock + vPureOil).toFixed(2)}`
+  document.getElementById('verifyArea').innerHTML =
+    `✅ 验算通过：${labels.label_outWater} ${vWater.toFixed(2)} mL + 油相 (${checkOil}) mL = 总计 ${checkTotal} mL`
+
+  // 缓存结果供保存
+  lastResult = {
+    time: new Date().toLocaleString('zh-CN'),
+    vTotal, rWater, rOil, cTarget, cStock,
+    vWater: vWater.toFixed(2),
+    vStock: vStock.toFixed(2),
+    vPureOil: vPureOil.toFixed(2),
+    summary: `取 ${vWater.toFixed(2)} mL ${labels.label_outWater}，加入 ${vStock.toFixed(2)} mL ${labels.label_outStock}（${cStock}%），再加入 ${vPureOil.toFixed(2)} mL ${labels.label_outOil} → ${vTotal.toFixed(2)} mL ${cTarget}% 目标乳液`,
+    // 记录当前标签值以便后续查看时不变
+    labelsSnapshot: { ...labels }
+  }
+
+  showResult()
+}
+
+// ============================================================
+//  保存 / 删除结果
+// ============================================================
+function getSavedResults() {
+  try { return JSON.parse(localStorage.getItem('emulsion_saved') || '[]') }
+  catch(e) { return [] }
+}
+
+function setSavedResults(arr) {
+  localStorage.setItem('emulsion_saved', JSON.stringify(arr))
+}
+
+function saveResult() {
+  if (!lastResult) return
+  const saved = getSavedResults()
+  saved.push({ ...lastResult })
+  setSavedResults(saved)
+  renderSaved()
+  // 轻反馈
+  const btn = document.querySelector('#resultArea button')
+  btn.innerHTML = '<i class="fa fa-check mr-1"></i>已保存'
+  btn.classList.add('text-green-400')
+  setTimeout(() => {
+    btn.innerHTML = '<i class="fa fa-bookmark mr-1"></i>保存此结果'
+    btn.classList.remove('text-green-400')
+  }, 1200)
+}
+
+function deleteSaved(index) {
+  const saved = getSavedResults()
+  saved.splice(index, 1)
+  setSavedResults(saved)
+  renderSaved()
+}
+
+function clearAllSaved() {
+  if (!confirm('确认清空全部历史保存？')) return
+  setSavedResults([])
+  renderSaved()
+}
+
+function renderSaved() {
+  const saved = getSavedResults()
+  const area = document.getElementById('savedArea')
+  const list = document.getElementById('savedList')
+  const count = document.getElementById('savedCount')
+
+  if (saved.length === 0) {
+    area.classList.add('hidden')
+    return
+  }
+
+  area.classList.remove('hidden')
+  count.textContent = `（${saved.length} 条）`
+
+  list.innerHTML = saved.map((r, i) => {
+    const lb = r.labelsSnapshot || labels
+    return `
+    <div class="saved-row glass rounded-xl p-3 flex items-start gap-3">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[10px] text-slate-500 font-mono">#${i + 1}</span>
+          <span class="text-[10px] text-slate-500">${r.time}</span>
+          <span class="text-[10px] text-cyan-400">V=${r.vTotal}mL ${r.rWater}:${r.rOil}</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-xs">
+          <div>💧 <span class="text-blue-300 font-mono">${r.vWater} mL</span> <span class="text-slate-500">${lb.label_outWater}</span></div>
+          <div>🧴 <span class="text-amber-300 font-mono">${r.vStock} mL</span> <span class="text-slate-500">${lb.label_outStock}</span></div>
+          <div>🥥 <span class="text-green-300 font-mono">${r.vPureOil} mL</span> <span class="text-slate-500">${lb.label_outOil}</span></div>
+        </div>
+      </div>
+      <button onclick="deleteSaved(${i})" class="delete-btn text-slate-600 hover:text-red-400 rounded-lg px-2 py-1 text-xs flex-shrink-0">
+        <i class="fa fa-trash-o"></i>
+      </button>
+    </div>`
+  }).join('')
+}
+
+// ============================================================
+//  实时更新水油比
+// ============================================================
+document.getElementById('rWater').addEventListener('input', updateRatio)
+document.getElementById('rOil').addEventListener('input', updateRatio)
+
+function updateRatio() {
+  const rw = parseFloat(document.getElementById('rWater').value) || 0
+  const ro = parseFloat(document.getElementById('rOil').value) || 0
+  document.getElementById('ratioDisplay').innerHTML =
+    `当前水油比：<b>${labels.label_rWater.split('（')[0] || '水'} : ${labels.label_rOil.split('（')[0] || '油'} = ${rw.toFixed(1)} : ${ro.toFixed(1)}</b>`
+}
+
+// ============================================================
+//  UI 辅助
+// ============================================================
+function showError(msg) {
+  const el = document.getElementById('errorArea')
+  el.innerHTML = msg
+  el.classList.remove('hidden')
+}
+function hideError() { document.getElementById('errorArea').classList.add('hidden') }
+function showResult() { document.getElementById('resultArea').classList.remove('hidden') }
+function hideResult() { document.getElementById('resultArea').classList.add('hidden') }
+
+function toggleDetail() {
+  const detail = document.getElementById('detailArea')
+  const arrow = document.getElementById('detailArrow')
+  detail.classList.toggle('hidden')
+  arrow.classList.toggle('rotate-180')
+}
+
+// ============================================================
+//  启动
+// ============================================================
+renderAllLabels()
+renderSaved()
+</script>
+</body>
+</html>

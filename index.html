@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>计算器工具集</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e2e8f0; min-height: 100vh; }
+  .glass { background: rgba(30,41,59,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; }
+  .card { transition: all 0.25s; cursor: pointer; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(6,182,212,0.12); border-color: rgba(34,211,238,0.25); }
+</style>
+</head>
+<body class="p-6 max-w-lg mx-auto">
+
+  <div class="text-center mb-8 pt-8">
+    <div class="text-5xl mb-3">🧰</div>
+    <h1 class="text-2xl font-bold tracking-wide">计算器工具集</h1>
+    <p class="text-slate-400 text-sm mt-1">Calculator Toolkit</p>
+  </div>
+
+  <div class="space-y-4">
+
+    <a href="/emulsion_calculator.html" class="card glass p-5 flex items-center gap-4 block" style="text-decoration:none;color:inherit;">
+      <div class="text-4xl flex-shrink-0">🧪</div>
+      <div>
+        <div class="font-semibold text-base">乳液制备配比计算器</div>
+        <div class="text-xs text-slate-400 mt-1">水/油/乳化剂一体配比，支持自定义标签与历史保存</div>
+      </div>
+      <i class="fa fa-chevron-right text-slate-600 ml-auto"></i>
+    </a>
+
+    <a href="/poker-scorer.html" class="card glass p-5 flex items-center gap-4 block" style="text-decoration:none;color:inherit;">
+      <div class="text-4xl flex-shrink-0">🃏</div>
+      <div>
+        <div class="font-semibold text-base">德州扑克记分器</div>
+        <div class="text-xs text-slate-400 mt-1">五名玩家 · 总奖池模式 · 赢家通吃结算</div>
+      </div>
+      <i class="fa fa-chevron-right text-slate-600 ml-auto"></i>
+    </a>
+
+    <a href="/blackjack-scorer.html" class="card glass p-5 flex items-center gap-4 block" style="text-decoration:none;color:inherit;">
+      <div class="text-4xl flex-shrink-0">🂡</div>
+      <div>
+        <div class="font-semibold text-base">21点记分器</div>
+        <div class="text-xs text-slate-400 mt-1">四名玩家 vs 庄家 · 下注/结算/历史追踪</div>
+      </div>
+      <i class="fa fa-chevron-right text-slate-600 ml-auto"></i>
+    </a>
+
+  </div>
+
+  <div class="text-center text-[10px] text-slate-600 mt-10 pb-6">
+    Built with Tailwind CSS · Open in browser
+  </div>
+
+</body>
+</html>
